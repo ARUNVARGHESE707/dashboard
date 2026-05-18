@@ -449,10 +449,10 @@
         <div class="kpi-sub" id="t-current-sub">—</div>
       </div>
       <div class="kpi-card blue">
-        <div class="kpi-icon">🎯</div>
-        <div class="kpi-label">Target (5 Months)</div>
-        <div class="kpi-value">₹1.5Cr</div>
-        <div class="kpi-sub">₹1,50,00,000 goal</div>
+        <div class="kpi-icon">📅</div>
+        <div class="kpi-label">Deadline</div>
+        <div class="kpi-value" style="font-size:1.3rem" id="t-deadline">Dec 25</div>
+        <div class="kpi-sub" id="t-days-left">—</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon">📈</div>
@@ -915,38 +915,51 @@ function renderRankList(id, data, color) {
 }
 
 // ── TARGET TAB ────────────────────────────────────────────────────────────────
-const TARGET_AMOUNT  = 15000000; // ₹1,50,00,000
-const TARGET_MONTHS  = 5;        // must be achieved in 5 months
+const TARGET_AMOUNT  = 15000000;              // ₹1,50,00,000
+const DEADLINE       = new Date('2026-12-25'); // December 25, 2026
 
 function renderTargetTab({ months, totals }) {
   const cur       = totals.fee;
   const remaining = Math.max(0, TARGET_AMOUNT - cur);
   const pct       = Math.min(100, (cur / TARGET_AMOUNT) * 100);
 
-  // How many of the 5 months have passed (based on months with data)
+  // Time calculations from today to deadline
+  const today        = new Date();
+  const msLeft       = DEADLINE - today;
+  const daysLeft     = Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)));
+  const monthsLeft   = Math.max(0, msLeft / (1000 * 60 * 60 * 24 * 30.44)); // fractional months
+  const wholeMonths  = Math.floor(monthsLeft);
+  const extraDays    = Math.round((monthsLeft - wholeMonths) * 30.44);
+
+  // Months elapsed since Dec 2025 start
   const monthsElapsed = months.length;
-  const monthsRemaining = Math.max(0, TARGET_MONTHS - monthsElapsed);
+  // Average revenue per month from actual data
+  const avgPerMonth  = monthsElapsed > 0 ? cur / monthsElapsed : 0;
 
-  // Monthly pace needed to hit target in remaining months
-  const neededPerMonth = monthsRemaining > 0 ? Math.ceil(remaining / monthsRemaining) : 0;
+  // Needed per month to hit target by deadline
+  const neededPerMonth = monthsLeft > 0 ? Math.ceil(remaining / monthsLeft) : 0;
 
-  // Average actual revenue per month so far
-  const avgPerMonth = monthsElapsed > 0 ? cur / monthsElapsed : 0;
-
-  // Projected total at current pace over 5 months
-  const projectedTotal = avgPerMonth * TARGET_MONTHS;
+  // Projected total at current pace by deadline
+  const projectedTotal = avgPerMonth * (monthsElapsed + monthsLeft);
   const onTrack = projectedTotal >= TARGET_AMOUNT;
 
-  // KPIs
+  // Deadline KPI
+  document.getElementById('t-deadline').textContent = 'Dec 25, 2026';
+  document.getElementById('t-days-left').textContent =
+    daysLeft > 0
+      ? `${daysLeft} days left (${wholeMonths}m ${extraDays}d)`
+      : '🏁 Deadline passed';
+
+  // Revenue KPIs
   document.getElementById('t-current').textContent = fmtL(cur);
-  document.getElementById('t-current-sub').textContent = `${monthsElapsed} of ${TARGET_MONTHS} months done`;
+  document.getElementById('t-current-sub').textContent = `${monthsElapsed} month${monthsElapsed!==1?'s':''} of data`;
   document.getElementById('t-remaining').textContent = fmtL(remaining);
   document.getElementById('t-remaining-sub').textContent = remaining > 0
-    ? `in ${monthsRemaining} month${monthsRemaining !== 1 ? 's' : ''} left`
+    ? `to earn by Dec 25`
     : '🎉 Target reached!';
   document.getElementById('t-needed').textContent = neededPerMonth > 0 ? fmtL(neededPerMonth) : '🎯 Done';
   document.getElementById('t-needed-sub').textContent = neededPerMonth > 0
-    ? `per month × ${monthsRemaining} months`
+    ? `per month till Dec 25`
     : 'Target achieved!';
 
   // Gauge
@@ -959,7 +972,7 @@ function renderTargetTab({ months, totals }) {
   document.getElementById('gaugePct').textContent = pct.toFixed(1) + '%';
   document.getElementById('gaugePct').style.color = gaugeColor;
   document.getElementById('gaugeSubText').innerHTML =
-    `<span style="color:${gaugeColor};font-weight:700">${fmtL(cur)}</span> of <span style="font-weight:700">₹1.5 Cr</span> in ${TARGET_MONTHS} months`;
+    `<span style="color:${gaugeColor};font-weight:700">${fmtL(cur)}</span> of <span style="font-weight:700">₹1.5 Cr</span> — deadline <strong>Dec 25, 2026</strong>`;
 
   // Milestones
   const milestones = [
@@ -985,7 +998,7 @@ function renderTargetTab({ months, totals }) {
   });
 
   // Monthly chart — actual bars + required pace line
-  const requiredPace = TARGET_AMOUNT / TARGET_MONTHS; // ₹30L/month needed
+  const requiredPace = neededPerMonth;
   getOrCreateChart('targetMonthlyChart', {
     type: 'bar',
     data: {
@@ -1019,18 +1032,18 @@ function renderTargetTab({ months, totals }) {
   const bestMonth = [...months].sort((a, b) => b.fee - a.fee)[0];
   const totalCollected = totals.reg + totals.adm;
   const collectionRate = cur > 0 ? ((totalCollected / cur) * 100).toFixed(1) : '0.0';
-  const deficit = TARGET_AMOUNT - projectedTotal;
+  const deficit = Math.max(0, TARGET_AMOUNT - projectedTotal);
 
   document.getElementById('paceStats').innerHTML = `
-    <div class="pace-stat"><span class="ps-label">Required / Month (5-mo plan)</span><span class="ps-value">${fmtL(requiredPace)}</span></div>
-    <div class="pace-stat"><span class="ps-label">Actual Avg / Month so far</span><span class="ps-value">${fmtL(avgPerMonth)}</span></div>
-    <div class="pace-stat"><span class="ps-label">Projected 5-Month Total</span><span class="ps-value ${paceColor}">${fmtL(projectedTotal)}</span></div>
-    <div class="pace-stat"><span class="ps-label">On Track for ₹1.5Cr in 5 mo?</span><span class="ps-value ${paceColor}">${onTrack ? '✅ Yes!' : '⚠️ Needs boost'}</span></div>
-    ${!onTrack ? `<div class="pace-stat"><span class="ps-label">Shortfall at current pace</span><span class="ps-value red">-${fmtL(deficit)}</span></div>` : ''}
-    <div class="pace-stat"><span class="ps-label">Needed in remaining ${monthsRemaining} month${monthsRemaining!==1?'s':''}</span><span class="ps-value orange">${fmtL(remaining)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Deadline</span><span class="ps-value">Dec 25, 2026 (${daysLeft} days)</span></div>
+    <div class="pace-stat"><span class="ps-label">Months Remaining</span><span class="ps-value">${wholeMonths}m ${extraDays}d</span></div>
+    <div class="pace-stat"><span class="ps-label">Required / Month to Hit Target</span><span class="ps-value orange">${fmtL(neededPerMonth)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Current Avg / Month</span><span class="ps-value">${fmtL(avgPerMonth)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Projected Total by Dec 25</span><span class="ps-value ${paceColor}">${fmtL(projectedTotal)}</span></div>
+    <div class="pace-stat"><span class="ps-label">On Track for ₹1.5Cr by Dec 25?</span><span class="ps-value ${paceColor}">${onTrack ? '✅ Yes!' : '⚠️ Needs boost'}</span></div>
+    ${deficit > 0 ? `<div class="pace-stat"><span class="ps-label">Shortfall at current pace</span><span class="ps-value red">−${fmtL(deficit)}</span></div>` : ''}
     <div class="pace-stat"><span class="ps-label">Best Month so far</span><span class="ps-value">${bestMonth ? bestMonth.name + ' — ' + fmtL(bestMonth.fee) : '—'}</span></div>
-    <div class="pace-stat"><span class="ps-label">Months Elapsed / Total</span><span class="ps-value">${monthsElapsed} of ${TARGET_MONTHS}</span></div>
-    <div class="pace-stat"><span class="ps-label">Total Collected</span><span class="ps-value green">${fmtL(totalCollected)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Total Fees Collected</span><span class="ps-value green">${fmtL(totalCollected)}</span></div>
     <div class="pace-stat"><span class="ps-label">Collection Rate</span><span class="ps-value">${collectionRate}% of course value</span></div>
   `;
 }
