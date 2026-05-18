@@ -15,46 +15,76 @@
       min-height: 100vh;
     }
 
+    /* ── Loading overlay ── */
+    #loadingOverlay {
+      position: fixed; inset: 0; background: #0f172acc;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999; backdrop-filter: blur(4px);
+      transition: opacity 0.4s;
+    }
+    #loadingOverlay.hidden { opacity: 0; pointer-events: none; }
+    .spinner {
+      width: 48px; height: 48px; border: 4px solid #334155;
+      border-top-color: #3b82f6; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loadingOverlay p { color: #94a3b8; font-size: 0.9rem; }
+
+    /* ── Error banner ── */
+    #errorBanner {
+      display: none; background: #7f1d1d; border-bottom: 1px solid #ef4444;
+      padding: 10px 36px; font-size: 0.8rem; color: #fca5a5;
+    }
+    #errorBanner a { color: #f87171; }
+
     /* ── Header ── */
     .header {
       background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #7c3aed 100%);
-      padding: 28px 40px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+      padding: 24px 40px 20px;
+      display: flex; align-items: center; justify-content: space-between;
       box-shadow: 0 4px 24px rgba(0,0,0,0.4);
     }
     .header-left h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.5px; color: #fff; }
     .header-left h1 span { color: #93c5fd; }
     .header-left p { font-size: 0.85rem; color: #bfdbfe; margin-top: 4px; font-style: italic; }
-    .header-right { font-size: 0.8rem; color: #bfdbfe; text-align: right; }
+    .header-right { font-size: 0.8rem; color: #bfdbfe; text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
     .badge { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-weight: 600; }
+
+    /* ── Live status ── */
+    .live-row { display: flex; align-items: center; gap: 8px; }
+    .live-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
+      box-shadow: 0 0 0 0 #22c55e66;
+      animation: pulse-green 2s infinite;
+    }
+    .live-dot.error { background: #ef4444; box-shadow: none; animation: none; }
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 #22c55e66; }
+      70% { box-shadow: 0 0 0 8px #22c55e00; }
+      100% { box-shadow: 0 0 0 0 #22c55e00; }
+    }
+    #lastUpdated { font-size: 0.72rem; color: #bfdbfe; }
+    #refreshBtn {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+      color: #e2e8f0; padding: 4px 12px; border-radius: 16px; font-size: 0.75rem;
+      cursor: pointer; transition: background 0.2s; font-family: inherit;
+    }
+    #refreshBtn:hover { background: rgba(255,255,255,0.2); }
+    #refreshBtn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── Nav tabs ── */
     .nav-tabs {
-      display: flex;
-      gap: 4px;
-      padding: 14px 36px 0;
-      background: #0f172a;
-      border-bottom: 1px solid #1e293b;
+      display: flex; gap: 4px; padding: 14px 36px 0;
+      background: #0f172a; border-bottom: 1px solid #1e293b;
     }
     .nav-tab {
-      padding: 9px 20px;
-      border-radius: 8px 8px 0 0;
-      font-size: 0.82rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: #64748b;
-      border: 1px solid transparent;
-      border-bottom: none;
-      transition: all 0.2s;
-      background: none;
+      padding: 9px 20px; border-radius: 8px 8px 0 0;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer;
+      color: #64748b; border: 1px solid transparent; border-bottom: none;
+      transition: all 0.2s; background: none;
     }
-    .nav-tab.active {
-      color: #93c5fd;
-      background: #1e293b;
-      border-color: #334155;
-    }
+    .nav-tab.active { color: #93c5fd; background: #1e293b; border-color: #334155; }
     .nav-tab:hover:not(.active) { color: #94a3b8; }
 
     /* ── Main ── */
@@ -139,33 +169,15 @@
     .rank-count { font-size: 0.82rem; font-weight: 700; color: #93c5fd; width: 28px; text-align: right; }
 
     /* ── COURSE BREAKDOWN PAGE ── */
-    .course-hero {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+    .course-hero { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
     .course-hero-card {
-      background: #1e293b;
-      border-radius: 14px;
-      padding: 20px 22px;
-      border: 1px solid #334155;
-      position: relative;
-      overflow: hidden;
+      background: #1e293b; border-radius: 14px; padding: 20px 22px;
+      border: 1px solid #334155; position: relative; overflow: hidden;
     }
-    .course-hero-card.top-course {
-      background: linear-gradient(135deg, #1e3a8a22, #7c3aed22);
-      border-color: #3b82f6;
-    }
+    .course-hero-card.top-course { background: linear-gradient(135deg, #1e3a8a22, #7c3aed22); border-color: #3b82f6; }
     .course-hero-card .ch-badge {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 20px;
-      margin-bottom: 12px;
-      display: inline-block;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 12px; display: inline-block;
     }
     .ch-badge.gold-badge   { background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; }
     .ch-badge.silver-badge { background: #94a3b822; color: #94a3b8; border: 1px solid #94a3b844; }
@@ -173,7 +185,6 @@
     .course-hero-card h2 { font-size: 1.1rem; font-weight: 700; color: #e2e8f0; margin-bottom: 4px; }
     .course-hero-card .ch-sub { font-size: 0.78rem; color: #64748b; margin-bottom: 14px; }
     .ch-stats { display: flex; gap: 20px; flex-wrap: wrap; }
-    .ch-stat-item { }
     .ch-stat-item .val { font-size: 1.25rem; font-weight: 800; }
     .ch-stat-item .lbl { font-size: 0.68rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.8px; }
     .ch-stat-item.rev .val { color: #4ade80; }
@@ -181,32 +192,22 @@
     .ch-stat-item.avg .val { color: #fb923c; }
 
     /* Course cards grid */
-    .course-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
+    .course-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px; }
     .course-card {
-      background: #1e293b;
-      border-radius: 12px;
-      padding: 18px 20px;
-      border: 1px solid #334155;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background: #1e293b; border-radius: 12px; padding: 18px 20px;
+      border: 1px solid #334155; transition: transform 0.2s, box-shadow 0.2s;
     }
     .course-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
     .cc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
     .cc-name { font-size: 0.9rem; font-weight: 700; color: #e2e8f0; }
     .cc-rank { font-size: 0.7rem; font-weight: 700; color: #64748b; background: #0f172a; padding: 2px 8px; border-radius: 10px; }
     .cc-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-    .cc-metric { }
     .cc-metric .m-val { font-size: 1rem; font-weight: 700; }
     .cc-metric .m-lbl { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.6px; margin-top: 1px; }
     .cc-metric.rev .m-val { color: #4ade80; }
     .cc-metric.stu .m-val { color: #60a5fa; }
     .cc-metric.avg .m-val { color: #fb923c; }
     .cc-metric.col .m-val { color: #c084fc; }
-    .cc-progress { }
     .cc-progress-label { display: flex; justify-content: space-between; font-size: 0.7rem; color: #64748b; margin-bottom: 4px; }
     .cc-progress-track { height: 5px; background: #0f172a; border-radius: 4px; overflow: hidden; }
     .cc-progress-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
@@ -222,10 +223,23 @@
       .course-hero { grid-template-columns: 1fr; }
       .main { padding: 16px; }
       .nav-tabs { padding: 10px 16px 0; }
+      .header { padding: 18px 20px 16px; flex-wrap: wrap; gap: 12px; }
     }
   </style>
 </head>
 <body>
+
+<!-- LOADING OVERLAY -->
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <p>Loading live data from Google Sheets…</p>
+</div>
+
+<!-- ERROR BANNER -->
+<div id="errorBanner">
+  ⚠️ Could not fetch live data — showing last loaded data. Make sure the sheet is shared as <strong>"Anyone with the link can view"</strong>.
+  &nbsp;<button onclick="loadData()" style="background:none;border:1px solid #f87171;color:#f87171;padding:2px 10px;border-radius:10px;cursor:pointer;font-size:0.75rem;">Retry</button>
+</div>
 
 <!-- HEADER -->
 <div class="header">
@@ -234,47 +248,50 @@
     <p>Live overview of student admissions, revenue &amp; counselor performance</p>
   </div>
   <div class="header-right">
-    <div class="badge">Dec 2025 – May 2026</div>
-    <div style="margin-top:6px">41 Total Admissions</div>
+    <div class="badge" id="headerBadge">Loading…</div>
+    <div class="live-row">
+      <div class="live-dot" id="liveDot"></div>
+      <span id="lastUpdated">Fetching…</span>
+    </div>
+    <button id="refreshBtn" onclick="loadData()">↻ Refresh</button>
   </div>
 </div>
 
 <!-- NAV TABS -->
 <div class="nav-tabs">
-  <button class="nav-tab active" onclick="switchTab('overview')">📊 Overview</button>
-  <button class="nav-tab" onclick="switchTab('courses')">📚 Course Breakdown</button>
-  <button class="nav-tab" onclick="switchTab('performance')">🏆 Counselor &amp; Leads</button>
+  <button class="nav-tab active" onclick="switchTab('overview', this)">📊 Overview</button>
+  <button class="nav-tab" onclick="switchTab('courses', this)">📚 Course Breakdown</button>
+  <button class="nav-tab" onclick="switchTab('performance', this)">🏆 Counselor &amp; Leads</button>
 </div>
 
 <div class="main">
 
-  <!-- ══════════════════════════════════════════ TAB 1: OVERVIEW ══════ -->
+  <!-- TAB 1: OVERVIEW -->
   <div class="tab-panel active" id="tab-overview">
-
     <div class="kpi-grid">
       <div class="kpi-card blue">
         <div class="kpi-icon">👥</div>
         <div class="kpi-label">Total Admissions</div>
-        <div class="kpi-value">41</div>
-        <div class="kpi-sub">Across 6 months</div>
+        <div class="kpi-value" id="kpi-students">—</div>
+        <div class="kpi-sub" id="kpi-students-sub">—</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon">💰</div>
         <div class="kpi-label">Total Course Value</div>
-        <div class="kpi-value">₹23.1L</div>
-        <div class="kpi-sub">₹2,307,500 pipeline</div>
+        <div class="kpi-value" id="kpi-fee">—</div>
+        <div class="kpi-sub" id="kpi-fee-sub">—</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon">📋</div>
         <div class="kpi-label">Reg. Fees Collected</div>
-        <div class="kpi-value">₹1.62L</div>
-        <div class="kpi-sub">₹162,500 received</div>
+        <div class="kpi-value" id="kpi-reg">—</div>
+        <div class="kpi-sub" id="kpi-reg-sub">—</div>
       </div>
       <div class="kpi-card purple">
         <div class="kpi-icon">✅</div>
         <div class="kpi-label">Admission Fees Paid</div>
-        <div class="kpi-value">₹2.42L</div>
-        <div class="kpi-sub">₹242,000 received</div>
+        <div class="kpi-value" id="kpi-adm">—</div>
+        <div class="kpi-sub" id="kpi-adm-sub">—</div>
       </div>
     </div>
 
@@ -300,21 +317,14 @@
           </tr>
         </thead>
         <tbody id="monthlyTableBody"></tbody>
-        <tfoot>
-          <tr><td>TOTAL</td><td>41</td><td>23,07,500</td><td>1,62,500</td><td>2,42,000</td><td>4,04,500</td><td>17.5%</td></tr>
-        </tfoot>
+        <tfoot id="monthlyTableFoot"></tfoot>
       </table>
     </div>
-
   </div>
 
-  <!-- ══════════════════════════════════════════ TAB 2: COURSES ══════ -->
+  <!-- TAB 2: COURSES -->
   <div class="tab-panel" id="tab-courses">
-
-    <!-- Top 3 hero cards -->
     <div class="course-hero" id="courseHero"></div>
-
-    <!-- Revenue chart + collection chart -->
     <div class="charts-row charts-row-2" style="margin-bottom:24px">
       <div class="chart-card">
         <h3><span class="dot" style="background:#4ade80"></span>Revenue by Course (₹)</h3>
@@ -325,14 +335,10 @@
         <div class="chart-wrap"><canvas id="courseStuChart"></canvas></div>
       </div>
     </div>
-
-    <!-- All course cards -->
     <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#64748b;margin-bottom:14px;">
       ALL COURSES — DETAILED METRICS
     </div>
     <div class="course-cards-grid" id="courseCardsGrid"></div>
-
-    <!-- Full detail table -->
     <div class="table-card">
       <h3>📊 Course-wise Full Breakdown</h3>
       <table>
@@ -345,17 +351,13 @@
           </tr>
         </thead>
         <tbody id="courseTableBody"></tbody>
-        <tfoot>
-          <tr><td></td><td>TOTAL</td><td>41</td><td>23,07,500</td><td>56,280</td><td>1,62,500</td><td>2,42,000</td><td>4,04,500</td><td>100%</td></tr>
-        </tfoot>
+        <tfoot id="courseTableFoot"></tfoot>
       </table>
     </div>
-
   </div>
 
-  <!-- ══════════════════════════════════════════ TAB 3: PERFORMANCE ══ -->
+  <!-- TAB 3: PERFORMANCE -->
   <div class="tab-panel" id="tab-performance">
-
     <div class="charts-row charts-row-2">
       <div class="chart-card">
         <h3><span class="dot" style="background:#f97316"></span>Counselor-wise Admissions</h3>
@@ -366,7 +368,6 @@
         <div class="chart-wrap"><canvas id="leadChart"></canvas></div>
       </div>
     </div>
-
     <div class="bottom-lists">
       <div class="list-card">
         <h3>🏆 Counselor Performance Ranking</h3>
@@ -377,278 +378,401 @@
         <div id="leadRank"></div>
       </div>
     </div>
-
   </div>
 
 </div>
 
-<div class="footer">Talent Fly Institute &nbsp;|&nbsp; Admission Sales Dashboard &nbsp;|&nbsp; Dec 2025 – May 2026</div>
+<div class="footer" id="footerText">Talent Fly Institute &nbsp;|&nbsp; Admission Sales Dashboard &nbsp;|&nbsp; Live Data</div>
 
 <script>
-// ── TAB SWITCHING ─────────────────────────────────────────────────────────
-function switchTab(id) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  event.target.classList.add('active');
-}
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SHEET_ID = '1ork8so8hUV3hy_KMwTmJhkeabXrCD5koMfcbcozpZoc';
+const CSV_URL  = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv`;
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
-// ── DATA ──────────────────────────────────────────────────────────────────
-const months = {
-  December: { students:5,  courseFee:168000, reg:8500,  adm:29000  },
-  January:  { students:4,  courseFee:199000, reg:21000, adm:34000  },
-  February: { students:9,  courseFee:526000, reg:47000, adm:129000 },
-  March:    { students:7,  courseFee:431000, reg:33000, adm:50000  },
-  April:    { students:5,  courseFee:339000, reg:18000, adm:0      },
-  May:      { students:11, courseFee:644500, reg:35000, adm:0      },
+const MONTH_ORDER = ['December','January','February','March','April','May','June','July','August','September','October','November'];
+const MONTH_NAMES = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+const PALETTE = ['#3b82f6','#22c55e','#f97316','#a855f7','#ec4899','#06b6d4','#eab308','#ef4444','#14b8a6','#8b5cf6'];
+
+const COURSE_LABELS = {
+  'logistics': 'Logistics', '6m log': '6m Logistics', 'pg dip logistics': 'PG Dip Logistics',
+  'ha': 'HA', 'adv dip log': 'Adv Dip Logistics', 'hrm': 'HRM',
+  'ha pg dip': 'HA PG Dip', 'wh': 'WH', 'wm': 'WM'
 };
 
-const courses = [
-  { name:'Logistics',         count:16, fee:1032000, reg:62000,  adm:212000 },
-  { name:'6m Logistics',      count:8,  fee:462500,  reg:26000,  adm:0      },
-  { name:'PG Dip Logistics',  count:4,  fee:306000,  reg:12000,  adm:0      },
-  { name:'HA',                count:6,  fee:235000,  reg:32500,  adm:10000  },
-  { name:'Adv Dip Logistics', count:1,  fee:93000,   reg:2000,   adm:0      },
-  { name:'HRM',               count:2,  fee:79000,   reg:8000,   adm:10000  },
-  { name:'HA PG Dip',         count:1,  fee:60000,   reg:5000,   adm:0      },
-  { name:'WH',                count:1,  fee:20000,   reg:10000,  adm:10000  },
-  { name:'WM',                count:1,  fee:20000,   reg:5000,   adm:0      },
-  { name:'Unknown',           count:1,  fee:0,       reg:0,      adm:0      },
-];
+function normalizeCourse(raw) {
+  const key = (raw || '').toLowerCase().trim();
+  return COURSE_LABELS[key] || raw || 'Unknown';
+}
 
-const counselors = [
-  { name:'Irin',    count:10 },
-  { name:'Anjana',  count:9  },
-  { name:'Najma',   count:6  },
-  { name:'Arya',    count:4  },
-  { name:'Sanooja', count:2  },
-  { name:'Arun',    count:1  },
-];
+// Chart instance registry — destroy before re-create
+const _charts = {};
+function getOrCreateChart(id, config) {
+  if (_charts[id]) { _charts[id].destroy(); }
+  _charts[id] = new Chart(document.getElementById(id), config);
+  return _charts[id];
+}
 
-const leads = [
-  { name:'Reference',     count:10 },
-  { name:'SG',            count:9  },
-  { name:'Google Ads',    count:8  },
-  { name:'Akhil',         count:4  },
-  { name:'Incoming',      count:4  },
-  { name:'Incoming Call', count:2  },
-  { name:'Raw Data',      count:2  },
-  { name:'Others',        count:2  },
-];
-
-const totalFee = courses.reduce((s,c) => s+c.fee, 0);
-
-// ── HELPERS ───────────────────────────────────────────────────────────────
-const fmt  = n => n.toLocaleString('en-IN');
+// ── HELPERS ────────────────────────────────────────────────────────────────────
+const fmt  = n => Math.round(n).toLocaleString('en-IN');
 const fmtL = n => n >= 100000 ? '₹' + (n/100000).toFixed(2) + 'L' : '₹' + fmt(n);
-const PALETTE = ['#3b82f6','#22c55e','#f97316','#a855f7','#ec4899','#06b6d4','#eab308','#ef4444','#14b8a6','#8b5cf6'];
 
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
 Chart.defaults.font.size = 11;
 
-// ── MONTHLY CHART ─────────────────────────────────────────────────────────
-const mLabels = Object.keys(months);
-new Chart(document.getElementById('monthlyChart'), {
-  type: 'bar',
-  data: {
-    labels: mLabels,
-    datasets: [
-      { label:'Students', data: mLabels.map(m=>months[m].students),
-        backgroundColor:'#3b82f6cc', borderColor:'#3b82f6', borderWidth:1.5, borderRadius:6, yAxisID:'yS' },
-      { label:'Course Value (₹K)', data: mLabels.map(m=>months[m].courseFee/1000),
-        backgroundColor:'#22c55e33', borderColor:'#22c55e', borderWidth:2, borderRadius:6, yAxisID:'yF' },
-      { label:'Collected (₹K)', data: mLabels.map(m=>(months[m].reg+months[m].adm)/1000),
-        type:'line', borderColor:'#f97316', backgroundColor:'#f9731622', borderWidth:2.5,
-        pointRadius:5, pointBackgroundColor:'#f97316', fill:true, tension:0.4, yAxisID:'yF' },
-    ]
-  },
-  options: {
-    responsive:true, interaction:{ mode:'index', intersect:false },
-    plugins:{ legend:{position:'top',labels:{boxWidth:12,padding:16}},
-      tooltip:{ callbacks:{ label: ctx => ctx.dataset.yAxisID==='yF'
-        ? ` ${ctx.dataset.label}: ₹${(ctx.parsed.y*1000).toLocaleString('en-IN')}`
-        : ` ${ctx.dataset.label}: ${ctx.parsed.y}` }} },
-    scales:{
-      x:{grid:{color:'#1e293b'},ticks:{color:'#64748b'}},
-      yS:{position:'left',grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:2},title:{display:true,text:'Students',color:'#64748b',font:{size:10}}},
-      yF:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#64748b',callback:v=>'₹'+v+'K'},title:{display:true,text:'Amount (₹K)',color:'#64748b',font:{size:10}}}
+// ── CSV PARSER ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const rows = [];
+  let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === ',' && !inQ) { row.push(cell.trim()); cell = ''; }
+    else if ((ch === '\n' || ch === '\r') && !inQ) {
+      if (ch === '\r' && text[i+1] === '\n') i++;
+      row.push(cell.trim()); rows.push(row); row = []; cell = '';
+    } else { cell += ch; }
+  }
+  if (cell || row.length) { row.push(cell.trim()); rows.push(row); }
+  return rows;
+}
+
+function parseDateMonth(s) {
+  if (!s) return null;
+  const parts = s.split('/');
+  if (parts.length === 3) return parseInt(parts[1]);
+  return null;
+}
+
+function processRows(rows) {
+  const students = [];
+  for (const r of rows) {
+    const name = r[1], course = r[2], fee = r[3];
+    const counselor = r[4], lead = r[5];
+    const regDate = r[6], regAmt = r[7], admDate = r[8], admAmt = r[9];
+
+    if (!name || name === 'Name of student') continue;
+    const feeVal = parseInt(fee);
+    if (!fee || isNaN(feeVal) || feeVal === 0) continue;
+
+    const mNum = parseDateMonth(regDate) || parseDateMonth(admDate);
+    const month = mNum ? MONTH_NAMES[mNum] : 'Unknown';
+
+    students.push({
+      month, name,
+      course: normalizeCourse(course),
+      fee: feeVal,
+      counselor: (counselor || 'Unknown').trim(),
+      lead: (lead || 'Unknown').trim(),
+      reg: parseInt(regAmt) || 0,
+      adm: parseInt(admAmt) || 0,
+    });
+  }
+  return students;
+}
+
+function aggregateData(students) {
+  // Months (in order)
+  const monthMap = {};
+  students.forEach(s => {
+    if (!monthMap[s.month]) monthMap[s.month] = { students:0, fee:0, reg:0, adm:0 };
+    monthMap[s.month].students++;
+    monthMap[s.month].fee += s.fee;
+    monthMap[s.month].reg += s.reg;
+    monthMap[s.month].adm += s.adm;
+  });
+  const months = MONTH_ORDER.filter(m => monthMap[m]).map(m => ({ name: m, ...monthMap[m] }));
+  // Add unknowns last
+  if (monthMap['Unknown']) months.push({ name: 'Unknown', ...monthMap['Unknown'] });
+
+  // Courses sorted by revenue
+  const courseMap = {};
+  students.forEach(s => {
+    if (!courseMap[s.course]) courseMap[s.course] = { name:s.course, count:0, fee:0, reg:0, adm:0 };
+    courseMap[s.course].count++;
+    courseMap[s.course].fee  += s.fee;
+    courseMap[s.course].reg  += s.reg;
+    courseMap[s.course].adm  += s.adm;
+  });
+  const courses = Object.values(courseMap).sort((a,b) => b.fee - a.fee);
+
+  // Counselors sorted by count
+  const cMap = {};
+  students.forEach(s => {
+    const k = s.counselor || 'Unknown';
+    if (!cMap[k]) cMap[k] = { name:k, count:0 };
+    cMap[k].count++;
+  });
+  const counselors = Object.values(cMap).sort((a,b) => b.count - a.count);
+
+  // Leads sorted by count
+  const lMap = {};
+  students.forEach(s => {
+    const k = s.lead || 'Unknown';
+    if (!lMap[k]) lMap[k] = { name:k, count:0 };
+    lMap[k].count++;
+  });
+  const leads = Object.values(lMap).sort((a,b) => b.count - a.count);
+
+  // Totals
+  const totals = students.reduce((t,s) => ({
+    students: t.students+1, fee: t.fee+s.fee, reg: t.reg+s.reg, adm: t.adm+s.adm
+  }), { students:0, fee:0, reg:0, adm:0 });
+
+  return { months, courses, counselors, leads, totals };
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render({ months, courses, counselors, leads, totals }) {
+  const { students, fee, reg, adm } = totals;
+  const collected = reg + adm;
+  const span = months.length > 0
+    ? (months[0].name + (months.length > 1 ? ' – ' + months[months.length-1].name : ''))
+    : 'All time';
+
+  // KPIs
+  document.getElementById('kpi-students').textContent = students;
+  document.getElementById('kpi-students-sub').textContent = `Across ${months.length} month${months.length!==1?'s':''}`;
+  document.getElementById('kpi-fee').textContent = fmtL(fee);
+  document.getElementById('kpi-fee-sub').textContent = '₹' + fmt(fee) + ' pipeline';
+  document.getElementById('kpi-reg').textContent = fmtL(reg);
+  document.getElementById('kpi-reg-sub').textContent = '₹' + fmt(reg) + ' received';
+  document.getElementById('kpi-adm').textContent = fmtL(adm);
+  document.getElementById('kpi-adm-sub').textContent = '₹' + fmt(adm) + ' received';
+  document.getElementById('headerBadge').textContent = span;
+  document.getElementById('footerText').textContent =
+    'Talent Fly Institute | Admission Sales Dashboard | ' + span;
+
+  renderMonthlyChart(months);
+  renderCourseDonut(courses);
+  renderMonthlyTable(months, totals);
+  renderCourseSection(courses, totals);
+  renderCourseRevChart(courses);
+  renderCourseStuChart(courses);
+  renderCounselorChart(counselors);
+  renderLeadChart(leads);
+  renderRankList('counselorRank', counselors, '#f97316');
+  renderRankList('leadRank', leads, '#22c55e');
+}
+
+function renderMonthlyChart(months) {
+  getOrCreateChart('monthlyChart', {
+    type: 'bar',
+    data: {
+      labels: months.map(m=>m.name),
+      datasets: [
+        { label:'Students', data: months.map(m=>m.students),
+          backgroundColor:'#3b82f6cc', borderColor:'#3b82f6', borderWidth:1.5, borderRadius:6, yAxisID:'yS' },
+        { label:'Course Value (₹K)', data: months.map(m=>m.fee/1000),
+          backgroundColor:'#22c55e33', borderColor:'#22c55e', borderWidth:2, borderRadius:6, yAxisID:'yF' },
+        { label:'Collected (₹K)', data: months.map(m=>(m.reg+m.adm)/1000),
+          type:'line', borderColor:'#f97316', backgroundColor:'#f9731622', borderWidth:2.5,
+          pointRadius:5, pointBackgroundColor:'#f97316', fill:true, tension:0.4, yAxisID:'yF' },
+      ]
+    },
+    options: {
+      responsive:true, interaction:{ mode:'index', intersect:false },
+      plugins:{ legend:{position:'top',labels:{boxWidth:12,padding:16}},
+        tooltip:{ callbacks:{ label: ctx => ctx.dataset.yAxisID==='yF'
+          ? ` ${ctx.dataset.label}: ₹${(ctx.parsed.y*1000).toLocaleString('en-IN')}`
+          : ` ${ctx.dataset.label}: ${ctx.parsed.y}` }} },
+      scales:{
+        x:{grid:{color:'#1e293b'},ticks:{color:'#64748b'}},
+        yS:{position:'left',grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:2},title:{display:true,text:'Students',color:'#64748b',font:{size:10}}},
+        yF:{position:'right',grid:{drawOnChartArea:false},ticks:{color:'#64748b',callback:v=>'₹'+v+'K'},title:{display:true,text:'Amount (₹K)',color:'#64748b',font:{size:10}}}
+      }
     }
-  }
-});
+  });
+}
 
-// ── COURSE DONUT (overview tab) ────────────────────────────────────────────
-new Chart(document.getElementById('courseDonutChart'), {
-  type:'doughnut',
-  data:{
-    labels: courses.map(c=>c.name),
-    datasets:[{ data:courses.map(c=>c.count), backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#1e293b', borderWidth:3, hoverOffset:8 }]
-  },
-  options:{ responsive:true, cutout:'62%',
-    plugins:{ legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
-      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} students`}} } }
-});
+function renderCourseDonut(courses) {
+  getOrCreateChart('courseDonutChart', {
+    type:'doughnut',
+    data:{
+      labels: courses.map(c=>c.name),
+      datasets:[{ data:courses.map(c=>c.count), backgroundColor:PALETTE.map(c=>c+'cc'), borderColor:'#1e293b', borderWidth:3, hoverOffset:8 }]
+    },
+    options:{ responsive:true, cutout:'62%',
+      plugins:{ legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed} students`}} } }
+  });
+}
 
-// ── COURSE REV CHART ──────────────────────────────────────────────────────
-const cSorted = [...courses].filter(c=>c.fee>0).sort((a,b)=>b.fee-a.fee);
-new Chart(document.getElementById('courseRevChart'), {
-  type:'bar',
-  data:{
-    labels: cSorted.map(c=>c.name),
-    datasets:[
-      { label:'Course Value (₹)', data:cSorted.map(c=>c.fee), backgroundColor:PALETTE.map(c=>c+'bb'), borderRadius:8, borderSkipped:false },
-      { label:'Collected (₹)',    data:cSorted.map(c=>c.reg+c.adm), backgroundColor:'#ffffff22', borderColor:'#ffffff55', borderWidth:1.5, borderRadius:8, borderSkipped:false }
-    ]
-  },
-  options:{
-    responsive:true, indexAxis:'y',
-    plugins:{ legend:{position:'top',labels:{boxWidth:10}},
-      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ₹${fmt(ctx.parsed.x)}`}} },
-    scales:{
-      x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',callback:v=>fmtL(v)}},
-      y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}}
-    }
-  }
-});
+function renderMonthlyTable(months, totals) {
+  const tbody = document.getElementById('monthlyTableBody');
+  tbody.innerHTML = '';
+  months.forEach((m, i) => {
+    const col = m.reg + m.adm;
+    const pct = m.fee > 0 ? ((col/m.fee)*100).toFixed(1) : '0.0';
+    const barW = m.fee > 0 ? Math.round((col/m.fee)*80) : 0;
+    tbody.innerHTML += `<tr style="${i%2?'background:#263145':''}">
+      <td>${m.name}</td><td>${m.students}</td><td>${fmt(m.fee)}</td>
+      <td>${fmt(m.reg)}</td><td>${fmt(m.adm)}</td><td>${fmt(col)}</td>
+      <td><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}px"></div><span>${pct}%</span></div></td>
+    </tr>`;
+  });
+  const tc = totals.reg + totals.adm;
+  const tpct = totals.fee > 0 ? ((tc/totals.fee)*100).toFixed(1) : '0.0';
+  document.getElementById('monthlyTableFoot').innerHTML =
+    `<tr><td>TOTAL</td><td>${totals.students}</td><td>${fmt(totals.fee)}</td><td>${fmt(totals.reg)}</td><td>${fmt(totals.adm)}</td><td>${fmt(tc)}</td><td>${tpct}%</td></tr>`;
+}
 
-// ── COURSE STUDENTS CHART ─────────────────────────────────────────────────
-new Chart(document.getElementById('courseStuChart'), {
-  type:'bar',
-  data:{
-    labels: cSorted.map(c=>c.name),
-    datasets:[{ label:'Students', data:cSorted.map(c=>c.count), backgroundColor:PALETTE.map(c=>c+'cc'), borderRadius:8, borderSkipped:false }]
-  },
-  options:{
-    responsive:true, indexAxis:'y',
-    plugins:{ legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>` Students: ${ctx.parsed.x}`}} },
-    scales:{
-      x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:2}},
-      y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}}
-    }
-  }
-});
-
-// ── COUNSELOR CHART ───────────────────────────────────────────────────────
-new Chart(document.getElementById('counselorChart'), {
-  type:'bar',
-  data:{
-    labels:counselors.map(c=>c.name),
-    datasets:[{ label:'Admissions', data:counselors.map(c=>c.count),
-      backgroundColor:['#f97316cc','#3b82f6cc','#a855f7cc','#06b6d4cc','#ec4899cc','#eab308cc'],
-      borderRadius:8, borderSkipped:false }]
-  },
-  options:{ indexAxis:'y', responsive:true,
-    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` Admissions: ${ctx.parsed.x}`}} },
-    scales:{ x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:1}}, y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}} }
-  }
-});
-
-// ── LEAD SOURCE CHART ─────────────────────────────────────────────────────
-new Chart(document.getElementById('leadChart'), {
-  type:'bar',
-  data:{
-    labels:leads.map(l=>l.name),
-    datasets:[{ label:'Count', data:leads.map(l=>l.count),
-      backgroundColor:PALETTE.slice(0,leads.length).map(c=>c+'cc'),
-      borderRadius:8, borderSkipped:false }]
-  },
-  options:{ indexAxis:'y', responsive:true,
-    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` Count: ${ctx.parsed.x}`}} },
-    scales:{ x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:2}}, y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'500'}}} }
-  }
-});
-
-// ── MONTHLY TABLE ─────────────────────────────────────────────────────────
-const tbody = document.getElementById('monthlyTableBody');
-Object.entries(months).forEach(([month, d], i) => {
-  const collected = d.reg + d.adm;
-  const pct = ((collected/d.courseFee)*100).toFixed(1);
-  const barW = Math.round((collected/d.courseFee)*80);
-  tbody.innerHTML += `<tr style="${i%2?'background:#263145':''}">
-    <td>${month}</td><td>${d.students}</td><td>${fmt(d.courseFee)}</td>
-    <td>${fmt(d.reg)}</td><td>${fmt(d.adm)}</td><td>${fmt(collected)}</td>
-    <td><div class="pct-bar-wrap"><div class="pct-bar" style="width:${barW}px"></div><span>${pct}%</span></div></td>
-  </tr>`;
-});
-
-// ── COURSE HERO TOP 3 ─────────────────────────────────────────────────────
-const top3 = courses.filter(c=>c.fee>0).slice(0,3);
-const badges = [
-  { cls:'gold-badge',   label:'🥇 #1 Top Revenue Course' },
-  { cls:'silver-badge', label:'🥈 #2 Runner Up' },
-  { cls:'bronze-badge', label:'🥉 #3 Third Place' },
-];
-const heroEl = document.getElementById('courseHero');
-top3.forEach((c,i) => {
-  const avg = c.count ? Math.round(c.fee/c.count) : 0;
-  heroEl.innerHTML += `
-  <div class="course-hero-card ${i===0?'top-course':''}">
-    <span class="ch-badge ${badges[i].cls}">${badges[i].label}</span>
-    <h2>${c.name}</h2>
-    <div class="ch-sub">${c.count} student${c.count!==1?'s':''} enrolled</div>
-    <div class="ch-stats">
-      <div class="ch-stat-item rev"><div class="val">${fmtL(c.fee)}</div><div class="lbl">Total Revenue</div></div>
-      <div class="ch-stat-item stu"><div class="val">${c.count}</div><div class="lbl">Students</div></div>
-      <div class="ch-stat-item avg"><div class="val">${fmtL(avg)}</div><div class="lbl">Avg Fee</div></div>
-    </div>
-  </div>`;
-});
-
-// ── COURSE CARDS ──────────────────────────────────────────────────────────
-const grid = document.getElementById('courseCardsGrid');
-courses.forEach((c, i) => {
-  const collected = c.reg + c.adm;
-  const avg = c.count ? Math.round(c.fee / c.count) : 0;
-  const pct = c.fee > 0 ? Math.round((collected/c.fee)*100) : 0;
-  const share = totalFee > 0 ? ((c.fee/totalFee)*100).toFixed(1) : '0.0';
-  const fillW = Math.round((c.fee/courses[0].fee)*100);
-  grid.innerHTML += `
-  <div class="course-card">
-    <div class="cc-header">
-      <div class="cc-name">${c.name}</div>
-      <div class="cc-rank">#${i+1}</div>
-    </div>
-    <div class="cc-metrics">
-      <div class="cc-metric rev"><div class="m-val">${fmtL(c.fee)}</div><div class="m-lbl">Course Value</div></div>
-      <div class="cc-metric stu"><div class="m-val">${c.count}</div><div class="m-lbl">Students</div></div>
-      <div class="cc-metric avg"><div class="m-val">${avg?fmtL(avg):'—'}</div><div class="m-lbl">Avg Fee</div></div>
-      <div class="cc-metric col"><div class="m-val">${pct}%</div><div class="m-lbl">Collected</div></div>
-    </div>
-    <div class="cc-progress">
-      <div class="cc-progress-label"><span>Revenue vs max</span><span>${fmtL(c.fee)}</span></div>
-      <div class="cc-progress-track">
-        <div class="cc-progress-fill" style="width:${fillW}%;background:${PALETTE[i%PALETTE.length]}"></div>
+function renderCourseSection(courses, totals) {
+  // Hero top 3
+  const top3 = courses.filter(c=>c.fee>0).slice(0,3);
+  const badges = [
+    { cls:'gold-badge',   label:'🥇 #1 Top Revenue Course' },
+    { cls:'silver-badge', label:'🥈 #2 Runner Up' },
+    { cls:'bronze-badge', label:'🥉 #3 Third Place' },
+  ];
+  const heroEl = document.getElementById('courseHero');
+  heroEl.innerHTML = '';
+  top3.forEach((c,i) => {
+    const avg = c.count ? Math.round(c.fee/c.count) : 0;
+    heroEl.innerHTML += `
+    <div class="course-hero-card ${i===0?'top-course':''}">
+      <span class="ch-badge ${badges[i].cls}">${badges[i].label}</span>
+      <h2>${c.name}</h2>
+      <div class="ch-sub">${c.count} student${c.count!==1?'s':''} enrolled</div>
+      <div class="ch-stats">
+        <div class="ch-stat-item rev"><div class="val">${fmtL(c.fee)}</div><div class="lbl">Total Revenue</div></div>
+        <div class="ch-stat-item stu"><div class="val">${c.count}</div><div class="lbl">Students</div></div>
+        <div class="ch-stat-item avg"><div class="val">${fmtL(avg)}</div><div class="lbl">Avg Fee</div></div>
       </div>
-    </div>
-    <div class="cc-share">${share}% of total revenue</div>
-  </div>`;
-});
+    </div>`;
+  });
 
-// ── COURSE TABLE ──────────────────────────────────────────────────────────
-const ctbody = document.getElementById('courseTableBody');
-courses.forEach((c, i) => {
-  const collected = c.reg + c.adm;
-  const avg = c.count ? Math.round(c.fee/c.count) : 0;
-  const share = totalFee > 0 ? ((c.fee/totalFee)*100).toFixed(1) : '0.0';
-  const barW = Math.round((c.fee/courses[0].fee)*70);
-  ctbody.innerHTML += `<tr style="${i%2?'background:#263145':''}">
-    <td style="text-align:left;color:#64748b;font-weight:400">${i+1}</td>
-    <td>${c.name}</td><td>${c.count}</td><td>${fmt(c.fee)}</td>
-    <td>${avg?fmt(avg):'—'}</td><td>${fmt(c.reg)}</td><td>${fmt(c.adm)}</td>
-    <td>${fmt(collected)}</td>
-    <td><div class="pct-bar-wrap">
-      <div class="pct-bar" style="width:${barW}px;background:${PALETTE[i%PALETTE.length]}"></div>
-      <span>${share}%</span>
-    </div></td>
-  </tr>`;
-});
+  // Course cards
+  const grid = document.getElementById('courseCardsGrid');
+  grid.innerHTML = '';
+  const maxFee = courses[0] ? courses[0].fee : 1;
+  courses.forEach((c, i) => {
+    const col = c.reg + c.adm;
+    const avg = c.count ? Math.round(c.fee/c.count) : 0;
+    const pct = c.fee > 0 ? Math.round((col/c.fee)*100) : 0;
+    const share = totals.fee > 0 ? ((c.fee/totals.fee)*100).toFixed(1) : '0.0';
+    const fillW = Math.round((c.fee/maxFee)*100);
+    grid.innerHTML += `
+    <div class="course-card">
+      <div class="cc-header"><div class="cc-name">${c.name}</div><div class="cc-rank">#${i+1}</div></div>
+      <div class="cc-metrics">
+        <div class="cc-metric rev"><div class="m-val">${fmtL(c.fee)}</div><div class="m-lbl">Course Value</div></div>
+        <div class="cc-metric stu"><div class="m-val">${c.count}</div><div class="m-lbl">Students</div></div>
+        <div class="cc-metric avg"><div class="m-val">${avg?fmtL(avg):'—'}</div><div class="m-lbl">Avg Fee</div></div>
+        <div class="cc-metric col"><div class="m-val">${pct}%</div><div class="m-lbl">Collected</div></div>
+      </div>
+      <div class="cc-progress">
+        <div class="cc-progress-label"><span>Revenue vs max</span><span>${fmtL(c.fee)}</span></div>
+        <div class="cc-progress-track"><div class="cc-progress-fill" style="width:${fillW}%;background:${PALETTE[i%PALETTE.length]}"></div></div>
+      </div>
+      <div class="cc-share">${share}% of total revenue</div>
+    </div>`;
+  });
 
-// ── RANK LISTS ────────────────────────────────────────────────────────────
-function buildRank(id, data, color) {
-  const max = data[0].count;
+  // Course table
+  const ctbody = document.getElementById('courseTableBody');
+  ctbody.innerHTML = '';
+  courses.forEach((c, i) => {
+    const col = c.reg + c.adm;
+    const avg = c.count ? Math.round(c.fee/c.count) : 0;
+    const share = totals.fee > 0 ? ((c.fee/totals.fee)*100).toFixed(1) : '0.0';
+    const barW = Math.round((c.fee/maxFee)*70);
+    ctbody.innerHTML += `<tr style="${i%2?'background:#263145':''}">
+      <td style="text-align:left;color:#64748b;font-weight:400">${i+1}</td>
+      <td>${c.name}</td><td>${c.count}</td><td>${fmt(c.fee)}</td>
+      <td>${avg?fmt(avg):'—'}</td><td>${fmt(c.reg)}</td><td>${fmt(c.adm)}</td><td>${fmt(col)}</td>
+      <td><div class="pct-bar-wrap">
+        <div class="pct-bar" style="width:${barW}px;background:${PALETTE[i%PALETTE.length]}"></div>
+        <span>${share}%</span>
+      </div></td>
+    </tr>`;
+  });
+  const tc = totals.reg + totals.adm;
+  const avgAll = totals.students ? Math.round(totals.fee/totals.students) : 0;
+  document.getElementById('courseTableFoot').innerHTML =
+    `<tr><td></td><td>TOTAL</td><td>${totals.students}</td><td>${fmt(totals.fee)}</td><td>${fmt(avgAll)}</td><td>${fmt(totals.reg)}</td><td>${fmt(totals.adm)}</td><td>${fmt(tc)}</td><td>100%</td></tr>`;
+}
+
+function renderCourseRevChart(courses) {
+  const sorted = [...courses].filter(c=>c.fee>0).sort((a,b)=>b.fee-a.fee);
+  getOrCreateChart('courseRevChart', {
+    type:'bar',
+    data:{
+      labels: sorted.map(c=>c.name),
+      datasets:[
+        { label:'Course Value (₹)', data:sorted.map(c=>c.fee), backgroundColor:PALETTE.map(c=>c+'bb'), borderRadius:8, borderSkipped:false },
+        { label:'Collected (₹)',    data:sorted.map(c=>c.reg+c.adm), backgroundColor:'#ffffff22', borderColor:'#ffffff55', borderWidth:1.5, borderRadius:8, borderSkipped:false }
+      ]
+    },
+    options:{
+      responsive:true, indexAxis:'y',
+      plugins:{ legend:{position:'top',labels:{boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ₹${fmt(ctx.parsed.x)}`}} },
+      scales:{
+        x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',callback:v=>fmtL(v)}},
+        y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}}
+      }
+    }
+  });
+}
+
+function renderCourseStuChart(courses) {
+  const sorted = [...courses].filter(c=>c.fee>0).sort((a,b)=>b.fee-a.fee);
+  getOrCreateChart('courseStuChart', {
+    type:'bar',
+    data:{
+      labels: sorted.map(c=>c.name),
+      datasets:[{ label:'Students', data:sorted.map(c=>c.count), backgroundColor:PALETTE.map(c=>c+'cc'), borderRadius:8, borderSkipped:false }]
+    },
+    options:{
+      responsive:true, indexAxis:'y',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` Students: ${ctx.parsed.x}`}} },
+      scales:{
+        x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:1}},
+        y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}}
+      }
+    }
+  });
+}
+
+function renderCounselorChart(counselors) {
+  getOrCreateChart('counselorChart', {
+    type:'bar',
+    data:{
+      labels:counselors.map(c=>c.name),
+      datasets:[{ label:'Admissions', data:counselors.map(c=>c.count),
+        backgroundColor: counselors.map((_,i)=>PALETTE[i%PALETTE.length]+'cc'),
+        borderRadius:8, borderSkipped:false }]
+    },
+    options:{ indexAxis:'y', responsive:true,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` Admissions: ${ctx.parsed.x}`}} },
+      scales:{ x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:1}}, y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'600'}}} }
+    }
+  });
+}
+
+function renderLeadChart(leads) {
+  getOrCreateChart('leadChart', {
+    type:'bar',
+    data:{
+      labels:leads.map(l=>l.name),
+      datasets:[{ label:'Count', data:leads.map(l=>l.count),
+        backgroundColor: leads.map((_,i)=>PALETTE[i%PALETTE.length]+'cc'),
+        borderRadius:8, borderSkipped:false }]
+    },
+    options:{ indexAxis:'y', responsive:true,
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` Count: ${ctx.parsed.x}`}} },
+      scales:{ x:{grid:{color:'#1e293b'},ticks:{color:'#64748b',stepSize:1}}, y:{grid:{display:false},ticks:{color:'#cbd5e1',font:{weight:'500'}}} }
+    }
+  });
+}
+
+function renderRankList(id, data, color) {
+  const max = data[0] ? data[0].count : 1;
   const medals = ['gold','silver','bronze'];
   const el = document.getElementById(id);
+  el.innerHTML = '';
   data.forEach((item, i) => {
     const w = Math.round((item.count/max)*90);
     el.innerHTML += `<div class="rank-row">
@@ -659,8 +783,68 @@ function buildRank(id, data, color) {
     </div>`;
   });
 }
-buildRank('counselorRank', counselors, '#f97316');
-buildRank('leadRank', leads, '#22c55e');
+
+// ── TAB SWITCHING ─────────────────────────────────────────────────────────────
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── DATA LOAD ─────────────────────────────────────────────────────────────────
+let refreshTimer = null;
+
+async function loadData() {
+  const btn = document.getElementById('refreshBtn');
+  const dot = document.getElementById('liveDot');
+  const lastUpd = document.getElementById('lastUpdated');
+  btn.disabled = true;
+  btn.textContent = '↻ Loading…';
+  lastUpd.textContent = 'Fetching…';
+
+  try {
+    const resp = await fetch(CSV_URL + '&t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const text = await resp.text();
+
+    // Detect if we got HTML instead of CSV (auth redirect)
+    if (text.trim().startsWith('<!')) throw new Error('Sheet not publicly accessible');
+
+    const rows = parseCSV(text);
+    const students = processRows(rows);
+    if (students.length === 0) throw new Error('No data parsed');
+
+    const data = aggregateData(students);
+    render(data);
+
+    const now = new Date();
+    lastUpd.textContent = 'Updated ' + now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'});
+    dot.className = 'live-dot';
+    document.getElementById('errorBanner').style.display = 'none';
+
+  } catch (err) {
+    console.error('Dashboard fetch error:', err);
+    dot.className = 'live-dot error';
+    lastUpd.textContent = 'Fetch failed';
+    document.getElementById('errorBanner').style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↻ Refresh';
+
+    // Hide loading overlay on first load
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('hidden');
+    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+  }
+
+  // Schedule next auto-refresh
+  clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(loadData, REFRESH_INTERVAL);
+}
+
+// Start on page load
+loadData();
 </script>
 </body>
 </html>
