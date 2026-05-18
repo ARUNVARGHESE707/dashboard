@@ -450,9 +450,9 @@
       </div>
       <div class="kpi-card blue">
         <div class="kpi-icon">🎯</div>
-        <div class="kpi-label">Annual Target</div>
+        <div class="kpi-label">Target (5 Months)</div>
         <div class="kpi-value">₹1.5Cr</div>
-        <div class="kpi-sub">₹1,50,00,000</div>
+        <div class="kpi-sub">₹1,50,00,000 goal</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon">📈</div>
@@ -915,27 +915,41 @@ function renderRankList(id, data, color) {
 }
 
 // ── TARGET TAB ────────────────────────────────────────────────────────────────
-const ANNUAL_TARGET = 15000000; // ₹1,50,00,000
+const TARGET_AMOUNT  = 15000000; // ₹1,50,00,000
+const TARGET_MONTHS  = 5;        // must be achieved in 5 months
 
 function renderTargetTab({ months, totals }) {
-  const cur = totals.fee;
-  const remaining = Math.max(0, ANNUAL_TARGET - cur);
-  const pct = Math.min(100, (cur / ANNUAL_TARGET) * 100);
+  const cur       = totals.fee;
+  const remaining = Math.max(0, TARGET_AMOUNT - cur);
+  const pct       = Math.min(100, (cur / TARGET_AMOUNT) * 100);
+
+  // How many of the 5 months have passed (based on months with data)
+  const monthsElapsed = months.length;
+  const monthsRemaining = Math.max(0, TARGET_MONTHS - monthsElapsed);
+
+  // Monthly pace needed to hit target in remaining months
+  const neededPerMonth = monthsRemaining > 0 ? Math.ceil(remaining / monthsRemaining) : 0;
+
+  // Average actual revenue per month so far
+  const avgPerMonth = monthsElapsed > 0 ? cur / monthsElapsed : 0;
+
+  // Projected total at current pace over 5 months
+  const projectedTotal = avgPerMonth * TARGET_MONTHS;
+  const onTrack = projectedTotal >= TARGET_AMOUNT;
 
   // KPIs
   document.getElementById('t-current').textContent = fmtL(cur);
-  document.getElementById('t-current-sub').textContent = '₹' + fmt(cur) + ' earned';
+  document.getElementById('t-current-sub').textContent = `${monthsElapsed} of ${TARGET_MONTHS} months done`;
   document.getElementById('t-remaining').textContent = fmtL(remaining);
-  document.getElementById('t-remaining-sub').textContent = remaining > 0 ? 'to reach target' : '🎉 Target reached!';
+  document.getElementById('t-remaining-sub').textContent = remaining > 0
+    ? `in ${monthsRemaining} month${monthsRemaining !== 1 ? 's' : ''} left`
+    : '🎉 Target reached!';
+  document.getElementById('t-needed').textContent = neededPerMonth > 0 ? fmtL(neededPerMonth) : '🎯 Done';
+  document.getElementById('t-needed-sub').textContent = neededPerMonth > 0
+    ? `per month × ${monthsRemaining} months`
+    : 'Target achieved!';
 
-  // Months elapsed & needed per month
-  const mCount = months.length || 1;
-  const avgPerMonth = cur / mCount;
-  const monthsLeft = remaining > 0 && avgPerMonth > 0 ? Math.ceil(remaining / avgPerMonth) : 0;
-  document.getElementById('t-needed').textContent = fmtL(remaining > 0 ? Math.ceil(remaining / Math.max(1, monthsLeft)) : 0);
-  document.getElementById('t-needed-sub').textContent = monthsLeft > 0 ? `for next ${monthsLeft} month${monthsLeft!==1?'s':''}` : '🎯 On track!';
-
-  // Gauge animation
+  // Gauge
   const circumference = 238.76;
   const offset = circumference - (pct / 100) * circumference;
   const fill = document.getElementById('gaugeFill');
@@ -945,14 +959,14 @@ function renderTargetTab({ months, totals }) {
   document.getElementById('gaugePct').textContent = pct.toFixed(1) + '%';
   document.getElementById('gaugePct').style.color = gaugeColor;
   document.getElementById('gaugeSubText').innerHTML =
-    `<span style="color:${gaugeColor};font-weight:700">${fmtL(cur)}</span> of <span style="font-weight:700">₹1.5 Cr</span> target`;
+    `<span style="color:${gaugeColor};font-weight:700">${fmtL(cur)}</span> of <span style="font-weight:700">₹1.5 Cr</span> in ${TARGET_MONTHS} months`;
 
   // Milestones
   const milestones = [
-    { icon: '🌱', name: '25% — ₹37.5L',  threshold: ANNUAL_TARGET * 0.25 },
-    { icon: '🔥', name: '50% — ₹75L',    threshold: ANNUAL_TARGET * 0.50 },
-    { icon: '🚀', name: '75% — ₹1.12Cr', threshold: ANNUAL_TARGET * 0.75 },
-    { icon: '🏆', name: '100% — ₹1.5Cr', threshold: ANNUAL_TARGET * 1.00 },
+    { icon: '🌱', name: '25% — ₹37.5L',  threshold: TARGET_AMOUNT * 0.25 },
+    { icon: '🔥', name: '50% — ₹75L',    threshold: TARGET_AMOUNT * 0.50 },
+    { icon: '🚀', name: '75% — ₹1.12Cr', threshold: TARGET_AMOUNT * 0.75 },
+    { icon: '🏆', name: '100% — ₹1.5Cr', threshold: TARGET_AMOUNT * 1.00 },
   ];
   const mlEl = document.getElementById('milestoneList');
   mlEl.innerHTML = '';
@@ -970,20 +984,21 @@ function renderTargetTab({ months, totals }) {
     </div>`;
   });
 
-  // Monthly chart — revenue bars + target pace line
-  const monthlyTarget = ANNUAL_TARGET / 12;
+  // Monthly chart — actual bars + required pace line
+  const requiredPace = TARGET_AMOUNT / TARGET_MONTHS; // ₹30L/month needed
   getOrCreateChart('targetMonthlyChart', {
     type: 'bar',
     data: {
       labels: months.map(m => m.name),
       datasets: [
         { label: 'Monthly Revenue', data: months.map(m => m.fee),
-          backgroundColor: months.map(m => m.fee >= monthlyTarget ? '#22c55e99' : '#3b82f699'),
-          borderColor: months.map(m => m.fee >= monthlyTarget ? '#22c55e' : '#3b82f6'),
+          backgroundColor: months.map(m => m.fee >= requiredPace ? '#22c55e99' : '#3b82f699'),
+          borderColor:      months.map(m => m.fee >= requiredPace ? '#22c55e'   : '#3b82f6'),
           borderWidth: 1.5, borderRadius: 6 },
-        { label: 'Monthly Target Pace', data: months.map(() => monthlyTarget),
-          type: 'line', borderColor: '#f97316', borderWidth: 2, borderDash: [6,3],
-          pointRadius: 0, fill: false, tension: 0 },
+        { label: `Required Pace (${fmtL(requiredPace)}/mo)`,
+          data: months.map(() => requiredPace),
+          type: 'line', borderColor: '#f97316', borderWidth: 2,
+          borderDash: [6, 3], pointRadius: 0, fill: false, tension: 0 },
       ]
     },
     options: {
@@ -1000,21 +1015,22 @@ function renderTargetTab({ months, totals }) {
   });
 
   // Pace analysis
-  const projectedTotal = avgPerMonth * 12;
-  const onTrack = projectedTotal >= ANNUAL_TARGET;
-  const paceColor = onTrack ? 'green' : projectedTotal >= ANNUAL_TARGET * 0.75 ? 'orange' : 'red';
-  const bestMonth = [...months].sort((a,b) => b.fee - a.fee)[0];
+  const paceColor = onTrack ? 'green' : projectedTotal >= TARGET_AMOUNT * 0.75 ? 'orange' : 'red';
+  const bestMonth = [...months].sort((a, b) => b.fee - a.fee)[0];
   const totalCollected = totals.reg + totals.adm;
   const collectionRate = cur > 0 ? ((totalCollected / cur) * 100).toFixed(1) : '0.0';
+  const deficit = TARGET_AMOUNT - projectedTotal;
 
   document.getElementById('paceStats').innerHTML = `
-    <div class="pace-stat"><span class="ps-label">Avg Revenue / Month</span><span class="ps-value">${fmtL(avgPerMonth)}</span></div>
-    <div class="pace-stat"><span class="ps-label">Monthly Target Pace</span><span class="ps-value">${fmtL(monthlyTarget)}</span></div>
-    <div class="pace-stat"><span class="ps-label">Projected Annual Total</span><span class="ps-value ${paceColor}">${fmtL(projectedTotal)}</span></div>
-    <div class="pace-stat"><span class="ps-label">On Track for Target?</span><span class="ps-value ${paceColor}">${onTrack ? '✅ Yes' : '⚠️ Needs boost'}</span></div>
-    <div class="pace-stat"><span class="ps-label">Best Month</span><span class="ps-value">${bestMonth ? bestMonth.name + ' — ' + fmtL(bestMonth.fee) : '—'}</span></div>
-    <div class="pace-stat"><span class="ps-label">Months to Target</span><span class="ps-value">${monthsLeft > 0 ? monthsLeft + ' months (at avg pace)' : '🎯 Reached!'}</span></div>
-    <div class="pace-stat"><span class="ps-label">Total Collected so far</span><span class="ps-value green">${fmtL(totalCollected)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Required / Month (5-mo plan)</span><span class="ps-value">${fmtL(requiredPace)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Actual Avg / Month so far</span><span class="ps-value">${fmtL(avgPerMonth)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Projected 5-Month Total</span><span class="ps-value ${paceColor}">${fmtL(projectedTotal)}</span></div>
+    <div class="pace-stat"><span class="ps-label">On Track for ₹1.5Cr in 5 mo?</span><span class="ps-value ${paceColor}">${onTrack ? '✅ Yes!' : '⚠️ Needs boost'}</span></div>
+    ${!onTrack ? `<div class="pace-stat"><span class="ps-label">Shortfall at current pace</span><span class="ps-value red">-${fmtL(deficit)}</span></div>` : ''}
+    <div class="pace-stat"><span class="ps-label">Needed in remaining ${monthsRemaining} month${monthsRemaining!==1?'s':''}</span><span class="ps-value orange">${fmtL(remaining)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Best Month so far</span><span class="ps-value">${bestMonth ? bestMonth.name + ' — ' + fmtL(bestMonth.fee) : '—'}</span></div>
+    <div class="pace-stat"><span class="ps-label">Months Elapsed / Total</span><span class="ps-value">${monthsElapsed} of ${TARGET_MONTHS}</span></div>
+    <div class="pace-stat"><span class="ps-label">Total Collected</span><span class="ps-value green">${fmtL(totalCollected)}</span></div>
     <div class="pace-stat"><span class="ps-label">Collection Rate</span><span class="ps-value">${collectionRate}% of course value</span></div>
   `;
 }
