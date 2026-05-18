@@ -213,6 +213,62 @@
     .cc-progress-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
     .cc-share { font-size: 0.7rem; color: #64748b; margin-top: 8px; text-align: right; }
 
+    /* ── TARGET TAB ── */
+    .target-hero {
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 28px;
+    }
+    .target-gauge-wrap {
+      background: #1e293b; border-radius: 14px; padding: 28px 32px;
+      border: 1px solid #334155; margin-bottom: 24px; text-align: center;
+    }
+    .target-gauge-wrap h3 { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 24px; text-align: left; }
+    .gauge-outer {
+      position: relative; width: 220px; height: 220px; margin: 0 auto 20px;
+    }
+    .gauge-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .gauge-track { fill: none; stroke: #1e3a5f; stroke-width: 18; stroke-linecap: round; }
+    .gauge-fill  { fill: none; stroke-width: 18; stroke-linecap: round; transition: stroke-dashoffset 1.2s ease; }
+    .gauge-center {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .gauge-pct  { font-size: 2.6rem; font-weight: 800; line-height: 1; }
+    .gauge-label{ font-size: 0.72rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .gauge-sub  { font-size: 0.78rem; color: #94a3b8; margin-top: 16px; }
+
+    .target-breakdown {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;
+    }
+    .target-monthly-card {
+      background: #1e293b; border-radius: 14px; padding: 22px 24px; border: 1px solid #334155;
+    }
+    .target-monthly-card h3 { font-size: 0.85rem; font-weight: 600; color: #cbd5e1; margin-bottom: 16px; }
+
+    .milestone-list { display: flex; flex-direction: column; gap: 12px; }
+    .milestone-row {
+      display: flex; align-items: center; gap: 14px; padding: 12px 16px;
+      background: #0f172a; border-radius: 10px; border: 1px solid #1e293b;
+      transition: border-color 0.2s;
+    }
+    .milestone-row.reached { border-color: #22c55e44; background: #14532d18; }
+    .milestone-icon { font-size: 1.4rem; flex-shrink: 0; }
+    .milestone-info { flex: 1; }
+    .milestone-info .m-name { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; }
+    .milestone-info .m-val  { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+    .milestone-badge {
+      font-size: 0.65rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+    }
+    .milestone-badge.done { background: #14532d44; color: #4ade80; border: 1px solid #22c55e44; }
+    .milestone-badge.pending { background: #1e3a5f44; color: #60a5fa; border: 1px solid #3b82f644; }
+
+    .pace-stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #1e293b; }
+    .pace-stat:last-child { border-bottom: none; }
+    .pace-stat .ps-label { font-size: 0.78rem; color: #94a3b8; }
+    .pace-stat .ps-value { font-size: 0.85rem; font-weight: 700; color: #e2e8f0; }
+    .ps-value.green { color: #4ade80; }
+    .ps-value.orange { color: #fb923c; }
+    .ps-value.red    { color: #f87171; }
+
     /* ── Footer ── */
     .footer { text-align: center; padding: 20px; color: #475569; font-size: 0.75rem; border-top: 1px solid #1e293b; }
 
@@ -262,6 +318,7 @@
   <button class="nav-tab active" onclick="switchTab('overview', this)">📊 Overview</button>
   <button class="nav-tab" onclick="switchTab('courses', this)">📚 Course Breakdown</button>
   <button class="nav-tab" onclick="switchTab('performance', this)">🏆 Counselor &amp; Leads</button>
+  <button class="nav-tab" onclick="switchTab('target', this)">🎯 Target &amp; Progress</button>
 </div>
 
 <div class="main">
@@ -378,6 +435,78 @@
         <div id="leadRank"></div>
       </div>
     </div>
+  </div>
+
+  <!-- TAB 4: TARGET & PROGRESS -->
+  <div class="tab-panel" id="tab-target">
+
+    <!-- KPI row -->
+    <div class="target-hero">
+      <div class="kpi-card green">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Current Revenue</div>
+        <div class="kpi-value" id="t-current">—</div>
+        <div class="kpi-sub" id="t-current-sub">—</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon">🎯</div>
+        <div class="kpi-label">Annual Target</div>
+        <div class="kpi-value">₹1.5Cr</div>
+        <div class="kpi-sub">₹1,50,00,000</div>
+      </div>
+      <div class="kpi-card orange">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">Remaining</div>
+        <div class="kpi-value" id="t-remaining">—</div>
+        <div class="kpi-sub" id="t-remaining-sub">—</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Needed / Month</div>
+        <div class="kpi-value" id="t-needed">—</div>
+        <div class="kpi-sub" id="t-needed-sub">—</div>
+      </div>
+    </div>
+
+    <!-- Gauge + Milestones -->
+    <div style="display:grid;grid-template-columns:1fr 1.6fr;gap:20px;margin-bottom:24px;">
+
+      <div class="target-gauge-wrap">
+        <h3><span class="dot" style="background:#22c55e"></span> Target Achievement</h3>
+        <div class="gauge-outer">
+          <svg class="gauge-svg" viewBox="0 0 100 100">
+            <circle class="gauge-track" cx="50" cy="50" r="38"/>
+            <circle class="gauge-fill" id="gaugeFill" cx="50" cy="50" r="38"
+              stroke="#22c55e"
+              stroke-dasharray="238.76"
+              stroke-dashoffset="238.76"/>
+          </svg>
+          <div class="gauge-center">
+            <div class="gauge-pct" id="gaugePct" style="color:#22c55e">0%</div>
+            <div class="gauge-label">Achieved</div>
+          </div>
+        </div>
+        <div class="gauge-sub" id="gaugeSubText">Loading…</div>
+      </div>
+
+      <div class="target-monthly-card">
+        <h3>🏁 Milestones</h3>
+        <div class="milestone-list" id="milestoneList"></div>
+      </div>
+    </div>
+
+    <!-- Monthly pace + Progress chart -->
+    <div class="target-breakdown">
+      <div class="target-monthly-card">
+        <h3><span class="dot" style="background:#3b82f6"></span> Monthly Revenue vs Target Pace</h3>
+        <div style="max-height:240px"><canvas id="targetMonthlyChart"></canvas></div>
+      </div>
+      <div class="target-monthly-card">
+        <h3>📊 Pace Analysis</h3>
+        <div id="paceStats"></div>
+      </div>
+    </div>
+
   </div>
 
 </div>
@@ -554,6 +683,7 @@ function render({ months, courses, counselors, leads, totals }) {
   renderLeadChart(leads);
   renderRankList('counselorRank', counselors, '#f97316');
   renderRankList('leadRank', leads, '#22c55e');
+  renderTargetTab({ months, totals });
 }
 
 function renderMonthlyChart(months) {
@@ -782,6 +912,111 @@ function renderRankList(id, data, color) {
       <div class="rank-count">${item.count}</div>
     </div>`;
   });
+}
+
+// ── TARGET TAB ────────────────────────────────────────────────────────────────
+const ANNUAL_TARGET = 15000000; // ₹1,50,00,000
+
+function renderTargetTab({ months, totals }) {
+  const cur = totals.fee;
+  const remaining = Math.max(0, ANNUAL_TARGET - cur);
+  const pct = Math.min(100, (cur / ANNUAL_TARGET) * 100);
+
+  // KPIs
+  document.getElementById('t-current').textContent = fmtL(cur);
+  document.getElementById('t-current-sub').textContent = '₹' + fmt(cur) + ' earned';
+  document.getElementById('t-remaining').textContent = fmtL(remaining);
+  document.getElementById('t-remaining-sub').textContent = remaining > 0 ? 'to reach target' : '🎉 Target reached!';
+
+  // Months elapsed & needed per month
+  const mCount = months.length || 1;
+  const avgPerMonth = cur / mCount;
+  const monthsLeft = remaining > 0 && avgPerMonth > 0 ? Math.ceil(remaining / avgPerMonth) : 0;
+  document.getElementById('t-needed').textContent = fmtL(remaining > 0 ? Math.ceil(remaining / Math.max(1, monthsLeft)) : 0);
+  document.getElementById('t-needed-sub').textContent = monthsLeft > 0 ? `for next ${monthsLeft} month${monthsLeft!==1?'s':''}` : '🎯 On track!';
+
+  // Gauge animation
+  const circumference = 238.76;
+  const offset = circumference - (pct / 100) * circumference;
+  const fill = document.getElementById('gaugeFill');
+  const gaugeColor = pct >= 100 ? '#22c55e' : pct >= 60 ? '#f97316' : pct >= 30 ? '#eab308' : '#3b82f6';
+  fill.style.strokeDashoffset = offset;
+  fill.style.stroke = gaugeColor;
+  document.getElementById('gaugePct').textContent = pct.toFixed(1) + '%';
+  document.getElementById('gaugePct').style.color = gaugeColor;
+  document.getElementById('gaugeSubText').innerHTML =
+    `<span style="color:${gaugeColor};font-weight:700">${fmtL(cur)}</span> of <span style="font-weight:700">₹1.5 Cr</span> target`;
+
+  // Milestones
+  const milestones = [
+    { icon: '🌱', name: '25% — ₹37.5L',  threshold: ANNUAL_TARGET * 0.25 },
+    { icon: '🔥', name: '50% — ₹75L',    threshold: ANNUAL_TARGET * 0.50 },
+    { icon: '🚀', name: '75% — ₹1.12Cr', threshold: ANNUAL_TARGET * 0.75 },
+    { icon: '🏆', name: '100% — ₹1.5Cr', threshold: ANNUAL_TARGET * 1.00 },
+  ];
+  const mlEl = document.getElementById('milestoneList');
+  mlEl.innerHTML = '';
+  milestones.forEach(m => {
+    const reached = cur >= m.threshold;
+    const mPct = Math.min(100, (cur / m.threshold) * 100).toFixed(1);
+    mlEl.innerHTML += `
+    <div class="milestone-row ${reached ? 'reached' : ''}">
+      <div class="milestone-icon">${m.icon}</div>
+      <div class="milestone-info">
+        <div class="m-name">${m.name}</div>
+        <div class="m-val">${reached ? 'Achieved ✓' : mPct + '% there — ' + fmtL(m.threshold - cur) + ' remaining'}</div>
+      </div>
+      <div class="milestone-badge ${reached ? 'done' : 'pending'}">${reached ? 'DONE' : 'PENDING'}</div>
+    </div>`;
+  });
+
+  // Monthly chart — revenue bars + target pace line
+  const monthlyTarget = ANNUAL_TARGET / 12;
+  getOrCreateChart('targetMonthlyChart', {
+    type: 'bar',
+    data: {
+      labels: months.map(m => m.name),
+      datasets: [
+        { label: 'Monthly Revenue', data: months.map(m => m.fee),
+          backgroundColor: months.map(m => m.fee >= monthlyTarget ? '#22c55e99' : '#3b82f699'),
+          borderColor: months.map(m => m.fee >= monthlyTarget ? '#22c55e' : '#3b82f6'),
+          borderWidth: 1.5, borderRadius: 6 },
+        { label: 'Monthly Target Pace', data: months.map(() => monthlyTarget),
+          type: 'line', borderColor: '#f97316', borderWidth: 2, borderDash: [6,3],
+          pointRadius: 0, fill: false, tension: 0 },
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'top', labels: { boxWidth: 10 } },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ₹${fmt(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { grid: { color: '#1e293b' }, ticks: { color: '#64748b' } },
+        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', callback: v => fmtL(v) } }
+      }
+    }
+  });
+
+  // Pace analysis
+  const projectedTotal = avgPerMonth * 12;
+  const onTrack = projectedTotal >= ANNUAL_TARGET;
+  const paceColor = onTrack ? 'green' : projectedTotal >= ANNUAL_TARGET * 0.75 ? 'orange' : 'red';
+  const bestMonth = [...months].sort((a,b) => b.fee - a.fee)[0];
+  const totalCollected = totals.reg + totals.adm;
+  const collectionRate = cur > 0 ? ((totalCollected / cur) * 100).toFixed(1) : '0.0';
+
+  document.getElementById('paceStats').innerHTML = `
+    <div class="pace-stat"><span class="ps-label">Avg Revenue / Month</span><span class="ps-value">${fmtL(avgPerMonth)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Monthly Target Pace</span><span class="ps-value">${fmtL(monthlyTarget)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Projected Annual Total</span><span class="ps-value ${paceColor}">${fmtL(projectedTotal)}</span></div>
+    <div class="pace-stat"><span class="ps-label">On Track for Target?</span><span class="ps-value ${paceColor}">${onTrack ? '✅ Yes' : '⚠️ Needs boost'}</span></div>
+    <div class="pace-stat"><span class="ps-label">Best Month</span><span class="ps-value">${bestMonth ? bestMonth.name + ' — ' + fmtL(bestMonth.fee) : '—'}</span></div>
+    <div class="pace-stat"><span class="ps-label">Months to Target</span><span class="ps-value">${monthsLeft > 0 ? monthsLeft + ' months (at avg pace)' : '🎯 Reached!'}</span></div>
+    <div class="pace-stat"><span class="ps-label">Total Collected so far</span><span class="ps-value green">${fmtL(totalCollected)}</span></div>
+    <div class="pace-stat"><span class="ps-label">Collection Rate</span><span class="ps-value">${collectionRate}% of course value</span></div>
+  `;
 }
 
 // ── TAB SWITCHING ─────────────────────────────────────────────────────────────
